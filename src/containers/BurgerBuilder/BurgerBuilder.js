@@ -23,10 +23,22 @@ class BurgerBuilder extends Component {
       cheese: 0,
       meat: 0,
     },
-    totalPrice: 4
+    totalPrice: 4,
+    purchasable: false
   }
 
-  addIngredienthandler = (type) => {
+  updatePurchaseState ( ingredients ) {
+    // turn this obj to array
+    const sum = Object.keys( ingredients )
+      .map(igKey => {
+        return ingredients[igKey]
+      }).reduce((sum, el) => {
+        return sum + el;
+      }, 0);
+    this.setState({purchasable: sum > 0});
+  }
+
+  addIngredientHandler = (type) => {
     const oldCount = this.state.ingredients[type];
     const updatedCounted = oldCount + 1;
     const updatedIngredients = {
@@ -37,9 +49,10 @@ class BurgerBuilder extends Component {
     const oldPrice = this.state.totalPrice;
     const newPrice = oldPrice + priceAddition;
     this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
+    this.updatePurchaseState(updatedIngredients);
   }
 
-  removeIngredienthandler = (type) => {
+  removeIngredientHandler = (type) => {
     const oldCount = this.state.ingredients[type];
     // nothing happen if we want to remove a non existing ingredient
     if (oldCount <= 0) {
@@ -54,6 +67,7 @@ class BurgerBuilder extends Component {
     const oldPrice = this.state.totalPrice;
     const newPrice = oldPrice - priceDeduction;
     this.setState({totalPrice: newPrice, ingredients: updatedIngredients});
+    this.updatePurchaseState(updatedIngredients);
   }
 
   render () {
@@ -69,9 +83,11 @@ class BurgerBuilder extends Component {
       <Aux>
         <Burger ingredients={this.state.ingredients}/>
         <BuildControls
-          ingredientRemoved={this.removeIngredienthandler}
-          ingredientAdded={this.addIngredienthandler}
-          disabled={disableInfo} />
+          ingredientRemoved={this.removeIngredientHandler}
+          ingredientAdded={this.addIngredientHandler}
+          disabled={disableInfo}
+          purchasable={this.state.purchasable}
+          price={this.state.totalPrice} />
       </Aux>
     );
   }
